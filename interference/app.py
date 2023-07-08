@@ -10,18 +10,38 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/chat/completions", methods=['POST'])
+@app.route("/v1/models", methods=['GET'])
+def models():
+    return {
+        "data": [
+            {
+                "id": "gpt-3.5-turbo",
+                "object": "model",
+                "owned_by": "openai",
+                "permission": ""
+            },
+            {
+                "id": "gpt-4",
+                "object": "model",
+                "owned_by": "openai",
+                "permission": ""
+            }
+        ],
+        "object": "list"
+    }
+
+@app.route("/v1/chat/completions", methods=['POST'])
 def chat_completions():
     streaming = request.json.get('stream', False)
     model = request.json.get('model', 'gpt-3.5-turbo')
     messages = request.json.get('messages')
     
-    response = ChatCompletion.create(model=model, stream=streaming,
+    response = ChatCompletion.create(model=model, provider=Provider.Bing, stream=streaming,
                                      messages=messages)
     
     if not streaming:
         while 'curl_cffi.requests.errors.RequestsError' in response:
-            response = ChatCompletion.create(model=model, stream=streaming,
+            response = ChatCompletion.create(model=model, provider=Provider.Bing, stream=streaming,
                                              messages=messages)
 
         completion_timestamp = int(time.time())
