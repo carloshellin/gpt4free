@@ -30,6 +30,7 @@ def models():
         "object": "list"
     }
 
+@app.route("/chat/completions", methods=['POST'])
 @app.route("/v1/chat/completions", methods=['POST'])
 def chat_completions():
     streaming = request.json.get('stream', False)
