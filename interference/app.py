@@ -3,6 +3,7 @@ import json
 import random
 import sys
 from flask import Flask, request
+from sentence_transformers import SentenceTransformer
 from flask_cors import CORS
 from waitress import serve
 
@@ -10,6 +11,32 @@ from g4f import ChatCompletion, Provider
 
 app = Flask(__name__)
 CORS(app)
+
+model = SentenceTransformer('all-mpnet-base-v2')
+
+@app.route("/embeddings", methods=['POST'])
+def get_embeddings():
+    data = request.get_json()
+    text = data.get('input', '')
+    model_name = data.get('model')
+
+    embeddings = model.encode(text, convert_to_tensor=True)
+
+    return {
+        'data': [
+            {
+                'embedding': embeddings.tolist(),
+                'index': 0,
+                'object': 'embedding'
+            }
+        ],
+        'model': model_name,
+        'object': 'list',
+        'usage': {
+            'prompt_tokens': 5,
+            'total_tokens': 5
+        }
+    }
 
 @app.route("/v1/models", methods=['GET'])
 def models():
