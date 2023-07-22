@@ -6,6 +6,7 @@ from flask import Flask, request
 from sentence_transformers import SentenceTransformer
 from flask_cors import CORS
 from waitress import serve
+from concurrent.futures import ThreadPoolExecutor
 
 from g4f import ChatCompletion, Provider
 
@@ -13,14 +14,20 @@ app = Flask(__name__)
 CORS(app)
 
 model = SentenceTransformer('all-mpnet-base-v2')
+executor = ThreadPoolExecutor(max_workers=4)
+
+def get_embeddings(texts):
+    embeddings = model.encode(texts, convert_to_tensor=True)
+    return embeddings
 
 @app.route("/embeddings", methods=['POST'])
-def get_embeddings():
+def handle_embeddings_request():
     data = request.get_json()
-    text = data.get('input', '')
+    input_text = data.get('input', '')
     model_name = data.get('model')
 
-    embeddings = model.encode(text, convert_to_tensor=True)
+    future = executor.submit(get_embeddings, input_text)
+    embeddings = future.result()
 
     return {
         'data': [
