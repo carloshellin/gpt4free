@@ -142,7 +142,10 @@ async def create_conversation():
                                   'upgrade-insecure-requests': '1',
                                   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.69',
                                   'x-edge-shopping-flag': '1',
-                                  'x-forwarded-for': Defaults.ip_address
+                                  'x-forwarded-for': Defaults.ip_address,
+                              },
+                              cookies={
+                                  '_U': os.environ.get('BING_U_COOKIE')
                               })
 
         conversationId = create.json().get('conversationId')
